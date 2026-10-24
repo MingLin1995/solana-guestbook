@@ -1,0 +1,25 @@
+# Dependencies
+node_modules/
+.pnp
+.pnp.js
+
+# Build outputs
+dist/
+build/
+target/
+.wrangler/
+
+# Environment and Local Configs
+.env
+.env.local
+.env.*.local
+*.pem
+
+# Solana / Anchor artifacts
+.anchor/
+test-ledger/
+id.json
+
+# OS files
+.DS_Store
+Thumbs.db

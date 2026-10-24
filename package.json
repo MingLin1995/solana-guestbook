@@ -1,0 +1,23 @@
+{
+  "name": "solana-guestbook",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Web3 Edge Fullstack Application: On-Chain Guestbook with Solana, Cloudflare Workers & React",
+  "packageManager": "pnpm@9.12.1",
+  "scripts": {
+    "dev:frontend": "pnpm --filter frontend dev",
+    "build:frontend": "pnpm --filter frontend build",
+    "worker:dev": "cd worker && npx wrangler dev",
+    "worker:deploy": "cd worker && npx wrangler deploy"
+  },
+  "keywords": [
+    "solana",
+    "anchor",
+    "cloudflare-workers",
+    "cloudflare-d1",
+    "react",
+    "web3"
+  ],
+  "author": "",
+  "license": "MIT"
+}

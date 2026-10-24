@@ -6,9 +6,8 @@ pub mod state;
 use errors::*;
 use state::*;
 
-// 宣告合約地址 (Program ID)
-// 在 Solana Playground 編譯部署時，Playground 會自動為你替換成真正的合約地址
-declare_id!("11111111111111111111111111111111");
+// 宣告合約地址 (Program ID) - 已成功部署至 Solana Devnet
+declare_id!("EKR4NkE7RYZiLynvP4LWEq6UNcbfKnKiJkq72ciwxoSm");
 
 #[program]
 pub mod guestbook {

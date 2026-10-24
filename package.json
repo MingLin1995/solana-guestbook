@@ -7,8 +7,9 @@
   "scripts": {
     "dev:frontend": "pnpm --filter frontend dev",
     "build:frontend": "pnpm --filter frontend build",
-    "worker:dev": "cd worker && npx wrangler dev",
-    "worker:deploy": "cd worker && npx wrangler deploy"
+    "worker:dev": "cd worker && export PATH=\"$HOME/.cargo/bin:$PATH\" && wrangler dev",
+    "worker:deploy": "cd worker && export PATH=\"$HOME/.cargo/bin:$PATH\" && wrangler deploy",
+    "worker:init-d1": "cd worker && wrangler d1 execute guestbook-db --local --file=./schema.sql"
   },
   "keywords": [
     "solana",
@@ -19,5 +20,8 @@
     "web3"
   ],
   "author": "",
-  "license": "MIT"
+  "license": "MIT",
+  "devDependencies": {
+    "wrangler": "^4.152.0"
+  }
 }

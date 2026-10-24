@@ -31,3 +31,42 @@ pub fn validate_checkin_payload(
 
     Ok(())
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    const VALID_PUBKEY: &str = "EKR4NkE7RYZiLynvP4LWEq6UNcbfKnKiJkq72ciwxoSm";
+    const VALID_SIG: &str = "5VERv8NMvzbJMEkV8xnrLkEaWRtSz9CosKDYj7WNXTHQXUrJhUCP5vwWcxWDN45x1T8YshbWwM5jP5ZJb25i58tA";
+
+    #[test]
+    fn test_valid_payload() {
+        let result = validate_checkin_payload(VALID_PUBKEY, "你好，區塊鏈！", VALID_SIG);
+        assert!(result.is_ok(), "合法的資料應通過驗證");
+    }
+
+    #[test]
+    fn test_empty_message() {
+        let result = validate_checkin_payload(VALID_PUBKEY, "   ", VALID_SIG);
+        assert_eq!(result, Err("留言內容不能為空"));
+    }
+
+    #[test]
+    fn test_message_too_long() {
+        let long_msg = "a".repeat(281);
+        let result = validate_checkin_payload(VALID_PUBKEY, &long_msg, VALID_SIG);
+        assert_eq!(result, Err("留言長度不能超過 280 個字元"));
+    }
+
+    #[test]
+    fn test_invalid_pubkey() {
+        let result = validate_checkin_payload("NotABase58Pubkey!", "留言", VALID_SIG);
+        assert!(result.is_err());
+    }
+
+    #[test]
+    fn test_invalid_signature() {
+        let result = validate_checkin_payload(VALID_PUBKEY, "留言", "TooShortSig");
+        assert!(result.is_err());
+    }
+}

@@ -1,3 +1,4 @@
+import { Buffer } from "buffer";
 import { PublicKey } from "@solana/web3.js";
 import { Program, AnchorProvider } from "@coral-xyz/anchor";
 import type { AnchorWallet } from "@solana/wallet-adapter-react";
@@ -6,7 +7,9 @@ import idl from "../idl.json";
 
 // 鏈上合約地址 (Devnet)
 export const PROGRAM_ID = new PublicKey(
-  idl.metadata?.address || "EKR4NkE7RYZiLynvP4LWEq6UNcbfKnKiJkq72ciwxoSm"
+  (idl as any).address ||
+    (idl as any).metadata?.address ||
+    "EKR4NkE7RYZiLynvP4LWEq6UNcbfKnKiJkq72ciwxoSm"
 );
 
 /**
@@ -31,5 +34,10 @@ export function getGuestbookProgram(
     wallet,
     AnchorProvider.defaultOptions()
   );
-  return new Program(idl as any, provider);
+  // 確保傳入 Anchor 的 IDL 具備根層級 address (符合 Anchor 0.30+ 規格)
+  const idlWithAddress = {
+    ...idl,
+    address: (idl as any).address || PROGRAM_ID.toBase58(),
+  };
+  return new Program(idlWithAddress as any, provider);
 }

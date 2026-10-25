@@ -62,7 +62,10 @@ export const CheckInForm: FC<Props> = ({ onCheckInSuccess }) => {
         }),
       });
 
-      const result = await res.json();
+      const result = await res.json().catch(() => ({
+        success: false,
+        error: "無法解析後端回應",
+      }));
       if (!result.success) {
         throw new Error(result.error || "簽到牆同步失敗");
       }
@@ -72,6 +75,7 @@ export const CheckInForm: FC<Props> = ({ onCheckInSuccess }) => {
       onCheckInSuccess();
     } catch (err: any) {
       console.error("簽到失敗:", err);
+      setStatusMsg("");
       setErrorMsg(err.message || "簽到交易失敗，請檢查 Devnet 餘額或重試");
     } finally {
       setLoading(false);

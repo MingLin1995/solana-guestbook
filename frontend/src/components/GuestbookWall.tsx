@@ -1,5 +1,6 @@
 import { FC, useEffect, useState } from "react";
 import { CheckInRecord, ApiResponse } from "../types";
+import { API_BASE_URL } from "../config";
 import { RefreshCw, ExternalLink, Clock, MessageSquare, Copy, Check } from "lucide-react";
 
 interface Props {
@@ -14,7 +15,7 @@ export const GuestbookWall: FC<Props> = ({ refreshTrigger }) => {
   const fetchCheckins = async () => {
     try {
       setLoading(true);
-      const res = await fetch("/api/checkins");
+      const res = await fetch(`${API_BASE_URL}/api/checkins`);
       const result: ApiResponse<CheckInRecord[]> = await res.json();
       if (result.success && result.data) {
         setCheckins(result.data);

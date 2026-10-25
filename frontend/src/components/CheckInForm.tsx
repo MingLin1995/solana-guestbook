@@ -2,6 +2,7 @@ import { FC, useState } from "react";
 import { useConnection, useAnchorWallet } from "@solana/wallet-adapter-react";
 import { SystemProgram } from "@solana/web3.js";
 import { getGuestbookProgram, findCheckInPda } from "../utils/anchor";
+import { API_BASE_URL } from "../config";
 import { Send, Loader2, CheckCircle2, AlertCircle } from "lucide-react";
 
 interface Props {
@@ -51,7 +52,7 @@ export const CheckInForm: FC<Props> = ({ onCheckInSuccess }) => {
 
       // 步驟 3：通知後端同步資料
       setStatusMsg("交易已上鏈！正在更新簽到牆...");
-      const res = await fetch("/api/checkin", {
+      const res = await fetch(`${API_BASE_URL}/api/checkin`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({

@@ -10,6 +10,7 @@
     "worker:dev": "cd worker && export PATH=\"$HOME/.cargo/bin:$PATH\" && wrangler dev",
     "worker:deploy": "cd worker && export PATH=\"$HOME/.cargo/bin:$PATH\" && wrangler deploy",
     "worker:init-d1": "cd worker && wrangler d1 execute guestbook-db --local --file=./schema.sql",
+    "worker:init-d1:remote": "cd worker && wrangler d1 execute guestbook-db --remote --file=./schema.sql",
     "test:worker": "node scripts/test-worker.mjs",
     "test:rust": "cd worker && export PATH=\"$HOME/.cargo/bin:$PATH\" && cargo test",
     "clean:rust": "cd worker && export PATH=\"$HOME/.cargo/bin:$PATH\" && cargo clean"

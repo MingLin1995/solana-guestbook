@@ -8,4 +8,4 @@ command = "worker-build --release"
 [[d1_databases]]
 binding = "DB"
 database_name = "guestbook-db"
-database_id = "local-guestbook-db"
+database_id = "06ea667f-19c9-46e7-b6c7-59b4788a2988"

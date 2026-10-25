@@ -7,6 +7,7 @@
   "scripts": {
     "dev:frontend": "pnpm --filter frontend dev",
     "build:frontend": "pnpm --filter frontend build",
+    "frontend:deploy": "pnpm run build:frontend && cd frontend && wrangler deploy",
     "worker:dev": "cd worker && export PATH=\"$HOME/.cargo/bin:$PATH\" && wrangler dev",
     "worker:deploy": "cd worker && export PATH=\"$HOME/.cargo/bin:$PATH\" && wrangler deploy",
     "worker:init-d1": "cd worker && wrangler d1 execute guestbook-db --local --file=./schema.sql",

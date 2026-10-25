@@ -1,0 +1,225 @@
+openapi: 3.0.3
+info:
+  title: Solana Guestbook Edge Worker API
+  description: >
+    Cloudflare Workers (Rust Wasm) + Cloudflare D1 (Edge SQLite)
+    後端微服務 API 規格文件。
+    支援 CQRS 架構的全球邊緣唯讀快取與鏈上簽到狀態同步。
+  version: 1.0.0
+servers:
+  - url: http://localhost:8787
+    description: 本地開發環境 (Miniflare / workerd)
+  - url: https://guestbook-worker.<your-account>.workers.dev
+    description: Cloudflare 邊緣生產環境
+
+paths:
+  /api/checkins:
+    get:
+      summary: 取得最新簽到列表 (Get Latest Check-ins)
+      description: 從 Cloudflare D1 邊緣資料庫讀取前 50 筆最新簽到記錄（按時間倒序排序）。
+      operationId: getCheckins
+      responses:
+        '200':
+          description: 成功取得簽到列表
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GetCheckinsResponse'
+              example:
+                success: true
+                data:
+                  - user_pubkey: "EKR4NkE7RYZiLynvP4LWEq6UNcbfKnKiJkq72ciwxoSm"
+                    message: "Hello Solana Devnet!"
+                    timestamp: 1792837773
+                    tx_signature: "4VERv8NMvzbJMEkV8xnrLkEaWRtSz9CosKDYj7WNXTHQXUrJhUCP5vwWcxWDN45x1T8YshbWwM5jP5ZJb25i58tB"
+                error: null
+        '500':
+          description: 資料庫查詢失敗
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                success: false
+                data: null
+                error: "D1 資料庫連接失敗: connection refused"
+
+  /api/checkin:
+    post:
+      summary: 同步鏈上簽到至邊緣資料庫 (Upsert Check-in)
+      description: >
+        接收前端送出的 Solana 交易簽名、錢包公鑰與留言內容。
+        在邊緣層驗證 Base58 編碼與字串長度後，以 UPSERT 語義寫入 Cloudflare D1。
+      operationId: upsertCheckin
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CheckInPayload'
+            example:
+              userPubkey: "EKR4NkE7RYZiLynvP4LWEq6UNcbfKnKiJkq72ciwxoSm"
+              message: "Hello Solana Devnet!"
+              txSignature: "4VERv8NMvzbJMEkV8xnrLkEaWRtSz9CosKDYj7WNXTHQXUrJhUCP5vwWcxWDN45x1T8YshbWwM5jP5ZJb25i58tB"
+      responses:
+        '200':
+          description: 簽到成功同步寫入
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessMessageResponse'
+              example:
+                success: true
+                data: "簽到記錄已成功同步至邊緣快取"
+                error: null
+        '400':
+          description: 請求資料格式錯誤或安全校驗未通過
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                invalid_pubkey:
+                  summary: 無效的公鑰長度
+                  value:
+                    success: false
+                    data: null
+                    error: "無效的錢包公鑰：Base58 解碼長度必須為 32 位元組"
+                invalid_signature:
+                  summary: 無效的交易簽名
+                  value:
+                    success: false
+                    data: null
+                    error: "無效的交易簽名：Base58 解碼長度必須為 64 位元組"
+                message_empty:
+                  summary: 留言不可為空
+                  value:
+                    success: false
+                    data: null
+                    error: "留言內容不能為空"
+                message_too_long:
+                  summary: 留言長度超標
+                  value:
+                    success: false
+                    data: null
+                    error: "留言內容過長（上限 280 字元）"
+        '500':
+          description: 邊緣資料庫寫入異常
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                success: false
+                data: null
+                error: "寫入資料庫失敗: sqlite constraint error"
+
+components:
+  schemas:
+    CheckInRecord:
+      type: object
+      required:
+        - user_pubkey
+        - message
+        - timestamp
+        - tx_signature
+      properties:
+        user_pubkey:
+          type: string
+          description: 用戶 Solana 錢包公鑰 (Base58 編碼，長度 32 bytes)
+          example: "EKR4NkE7RYZiLynvP4LWEq6UNcbfKnKiJkq72ciwxoSm"
+        message:
+          type: string
+          description: 簽到留言文字 (長度 1 ~ 280 字元)
+          example: "Hello Solana Devnet!"
+        timestamp:
+          type: integer
+          format: int64
+          description: Unix 時間戳（秒）
+          example: 1792837773
+        tx_signature:
+          type: string
+          description: Solana 鏈上交易簽名 (Base58 編碼，長度 64 bytes)
+          example: "4VERv8NMvzbJMEkV8xnrLkEaWRtSz9CosKDYj7WNXTHQXUrJhUCP5vwWcxWDN45x1T8YshbWwM5jP5ZJb25i58tB"
+
+    CheckInPayload:
+      type: object
+      required:
+        - userPubkey
+        - message
+        - txSignature
+      properties:
+        userPubkey:
+          type: string
+          description: 用戶 Solana 錢包公鑰 (32-byte Base58)
+          example: "EKR4NkE7RYZiLynvP4LWEq6UNcbfKnKiJkq72ciwxoSm"
+        message:
+          type: string
+          minLength: 1
+          maxLength: 280
+          description: 簽到留言 (1 ~ 280 字元)
+          example: "Hello Solana Devnet!"
+        txSignature:
+          type: string
+          description: 鏈上確認的 Transaction Signature (64-byte Base58)
+          example: "4VERv8NMvzbJMEkV8xnrLkEaWRtSz9CosKDYj7WNXTHQXUrJhUCP5vwWcxWDN45x1T8YshbWwM5jP5ZJb25i58tB"
+        timestamp:
+          type: integer
+          format: int64
+          description: 可選自定義時間戳（若未提供由邊緣 Worker 自動取當前 UTC 時間）
+          example: 1792837773
+
+    GetCheckinsResponse:
+      type: object
+      required:
+        - success
+        - data
+        - error
+      properties:
+        success:
+          type: boolean
+          example: true
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/CheckInRecord'
+        error:
+          type: string
+          nullable: true
+          example: null
+
+    SuccessMessageResponse:
+      type: object
+      required:
+        - success
+        - data
+        - error
+      properties:
+        success:
+          type: boolean
+          example: true
+        data:
+          type: string
+          example: "簽到記錄已成功同步至邊緣快取"
+        error:
+          type: string
+          nullable: true
+          example: null
+
+    ErrorResponse:
+      type: object
+      required:
+        - success
+        - data
+        - error
+      properties:
+        success:
+          type: boolean
+          example: false
+        data:
+          type: string
+          nullable: true
+          example: null
+        error:
+          type: string
+          example: "無效的錢包公鑰：Base58 解碼長度必須為 32 位元組"

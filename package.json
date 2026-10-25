@@ -5,6 +5,7 @@
   "description": "Web3 Edge Fullstack Application: On-Chain Guestbook with Solana, Cloudflare Workers & React",
   "packageManager": "pnpm@9.12.1",
   "scripts": {
+    "build": "pnpm run build:frontend",
     "dev:frontend": "pnpm --filter frontend dev",
     "build:frontend": "pnpm --filter frontend build",
     "frontend:deploy": "pnpm run build:frontend && cd frontend && wrangler deploy",

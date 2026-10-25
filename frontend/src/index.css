@@ -1,0 +1,36 @@
+@import "@solana/wallet-adapter-react-ui/styles.css";
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Solana 錢包按鈕 */
+.wallet-adapter-button {
+  font-family: inherit !important;
+  background: linear-gradient(135deg, #9945ff 0%, #14f195 100%) !important;
+  color: #000 !important;
+  font-weight: 700 !important;
+  font-size: 0.875rem !important;
+  border-radius: 0.75rem !important;
+  padding: 0 1.25rem !important;
+  height: 40px !important;
+  line-height: 40px !important;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
+  box-shadow: 0 4px 14px rgba(153, 69, 255, 0.25) !important;
+}
+
+.wallet-adapter-button:hover {
+  opacity: 0.9 !important;
+  transform: translateY(-1px) !important;
+  box-shadow: 0 6px 18px rgba(20, 241, 149, 0.35) !important;
+}
+
+.wallet-adapter-dropdown-list {
+  background: #182030 !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  border-radius: 0.75rem !important;
+}
+
+.wallet-adapter-dropdown-list-item:hover {
+  background: rgba(153, 69, 255, 0.2) !important;
+}

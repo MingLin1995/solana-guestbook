@@ -1,4 +1,5 @@
 import { spawn } from "node:child_process";
+import path from "node:path";
 
 const TEST_PORT = 8788;
 const BASE_URL = `http://127.0.0.1:${TEST_PORT}`;
@@ -20,7 +21,8 @@ const env = {
   PATH: `${cargoPath}:${process.env.PATH}`,
 };
 
-const server = spawn("npx", ["wrangler", "dev", "--port", String(TEST_PORT)], {
+const wranglerBin = path.resolve("node_modules/.bin/wrangler");
+const server = spawn(wranglerBin, ["dev", "--port", String(TEST_PORT)], {
   cwd: "worker",
   env,
   stdio: "pipe",
@@ -164,6 +166,7 @@ async function runTests() {
       ),
     );
     if (failed > 0) process.exit(1);
+    process.exit(0);
   }
 }
 
